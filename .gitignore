@@ -1,0 +1,20 @@
+#
+*.un~
+#
+/*.pyc
+/*.swp
+*.log
+# Environments
+.env
+.gitlab-ci.yml
+#
+__pycache__/
+#
+.idea/
+#
+config.py
+config.py.*
+#
+onulist*
+#
+pyvenv.cfg
