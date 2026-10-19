@@ -1,11 +1,13 @@
 from aiogram import F, types, Router
-from aiogram.filters import CommandStart, Command
+from aiogram.filters import CommandStart, Command, or_f
 
 from decorators.auth import user_required, auth
 from services.logger import log_write
 from services.backend_api_connect import get_api
 from variables.users import oltshub_tokens
-from variables.messages import start_message
+from variables.messages import start_message, help_message
+from services.level_color import level_color
+from kbds import reply
 
 
 u_router = Router()
@@ -16,13 +18,16 @@ async def start_cmd(message: types.Message):
     '''
     Команда /start
     '''
-    await message.answer(start_message)
+    await message.answer(start_message, 
+                         reply_markup=reply.start_kb.as_markup(
+                                resize_keyboard=True,
+                                input_field_placeholder='Что Вас интересует?'
+                         ))
 
 
-@u_router.message(Command('menu'))
-@user_required
+@u_router.message(or_f(Command('help'), (F.text.lower() == 'справка')))
 async def menu_cmd(message: types.Message):
-    await message.answer('Menu:')
+    await message.answer(help_message, reply_markup=reply.del_kbd)
 
 
 @u_router.message(Command('login'))
@@ -37,7 +42,7 @@ async def user_login(message: types.Message):
         else:
             oltshub_tokens.update({str(message.from_user.id): result['token']})
             log_write(f'User: {user_input[1]} ({message.from_user.id}); Action: AUTH; Message: Успешный вход в систему')
-            await message.answer('Успешный вход в OLTsHUB')
+            await message.answer('Успешный вход в OLTsHUB ✅')
 
     except IndexError:
         await message.answer('Введите <code>/login ВАШ_ЛОГИН</code>')
@@ -67,16 +72,38 @@ async def find_onu(message: types.Message):
                 else:
                     for r in req['onu']:
                         result += f'''
+--- ONU Info 📊 ---
 <b>ONU:</b> {r['mac/sn']}
 <b>Descr:</b> {r['onudescr']}
-<b>Статус:</b> {r['iface_state']}
+<b>Статус:</b> {r['iface_state']} {'✅' if r['onu_state'] == 1 else '❌'}
+
 <b>ОЛТ:</b> {r['oltname']}
 <b>IP ОЛТа:</b> {r['oltip']}
 <b>Порт:</b> {r['iface_name']}<b> ID:</b> {r['onuid']}
-<b>ONU RX:</b> {r['level_onu_rx']}
-<b>OLT RX:</b> {r['level_olt_rx']}
-'''
 
+<b>ONU RX:</b> {r['level_onu_rx']} {level_color(r['level_onu_rx'])}
+<b>OLT RX:</b> {r['level_olt_rx']} {level_color(r['level_olt_rx'])}
+
+<b>Статус LAN порта:</b>
+{"\n".join(f"Port: {x['port']} State: {x['status']}" for x in r['lanstate'])}
+
+<b>MAC адреса:</b>
+{"\n".join(str(x) for x in r['lan_mac'])}
+
+<b>Uptime/Время включения:</b>
+{r['uptime']}
+
+<b>Время последнего выключения:</b>
+{r['downtime']}
+<b>Причина последнего выключения:</b>
+{r['reason_offline']}
+
+<b>Статус CATV порта:</b>
+{r['catvstate']}
+<b>Уровень сигнала CATV:</b>
+{r['catvlevel']}
+'''
+#Port: {", ".join(str(x['port']) for x in r['lanstate'])} State: {", ".join(str(x['status']) for x in r['lanstate'])}
                     await message.answer(result)
 
         except KeyError:

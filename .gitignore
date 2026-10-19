@@ -6,7 +6,6 @@
 *.log
 # Environments
 .env
-.gitlab-ci.yml
 #
 __pycache__/
 #
