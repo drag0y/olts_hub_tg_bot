@@ -8,7 +8,7 @@
 Вход в приложение осуществляется по связке Логин + Телеграм ID, оба этих параметра хранятся в OLTsHUB в соответствующих полях.
 
 <div align="center">
-  <img src="/docs/images/users.jpg" alt="OLTsHUB users"/>
+  <img src="/docs/images/users.jpg" alt="OLTsHUB users" />
 </div>
 
 Что бы посмотреть список доступных ОЛТов, введите команду /olts_list или "список олтов", или в стартовом меню нажмите кнопку "Список ОЛТов".  

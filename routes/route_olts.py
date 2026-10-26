@@ -186,7 +186,7 @@ async def port_status_btn(callback: types.CallbackQuery):
 
         port_info = get_port_status(oltid, port, oltshub_tokens[str(callback.from_user.id)])
         if len(port_info) == 0:
-            await callback.answer('На порту нет ОНУ.')
+            await callback.message.answer('На порту нет ОНУ.')
         else:
             for p in port_info:
                 await callback.message.answer(p)

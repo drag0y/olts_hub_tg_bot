@@ -60,15 +60,12 @@ async def find_onu(message: types.Message):
     result = ''
 
     if len(user_input) == 12 or len(user_input) == 16:
-
-        #req = findonu(user_input, oltshub_tokens[str(message.from_user.id)])
         URL = f"/api/onuinfo/{user_input}"
         req = get_api(URL, oltshub_tokens[str(message.from_user.id)])
         try:
             if isinstance(req, dict):
                 if req['result'] == 'error':
                     await message.answer(req['message'])
-
                 else:
                     for r in req['onu']:
                         result += f'''
@@ -103,7 +100,7 @@ async def find_onu(message: types.Message):
 <b>Уровень сигнала CATV:</b>
 {r['catvlevel']}
 '''
-#Port: {", ".join(str(x['port']) for x in r['lanstate'])} State: {", ".join(str(x['status']) for x in r['lanstate'])}
+
                     await message.answer(result)
 
         except KeyError:
